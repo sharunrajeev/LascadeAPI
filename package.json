@@ -1,0 +1,37 @@
+{
+  "name": "lascade-api",
+  "version": "1.0.0",
+  "description": "API created as part of the coding challenge of Lascade Techologies test",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sharunrajeev/LascadeAPI.git"
+  },
+  "author": "sharunerajeev",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sharunrajeev/LascadeAPI/issues"
+  },
+  "homepage": "https://github.com/sharunrajeev/LascadeAPI#readme",
+  "dependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/bull": "^4.10.0",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/multer": "^1.4.11",
+    "@types/node": "^20.14.10",
+    "bcryptjs": "^2.4.3",
+    "bull": "^4.15.1",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.12.0",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.3",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.5.3"
+  }
+}
