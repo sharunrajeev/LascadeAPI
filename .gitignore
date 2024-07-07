@@ -1,3 +1,9 @@
+# Uploaded files
+uploads/
+
+# Mongodb files
+*.rdb
+
 # Ignore CSV files
 *.csv
 

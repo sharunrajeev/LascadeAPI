@@ -1,19 +1,18 @@
 require("dotenv").config();
-import express, { Application } from "express";
-import bodyParser from "body-parser";
-import userRoutes from "./routes/user";
-import csvRoutes from "./routes/csv";
-import { sequelize } from "./models";
+import express, { Application, json } from "express";
+import cors from "cors";
+import userRoutes from "./routes/userRoutes";
+import csvRoutes from "./routes/csvRoutes";
+import { connectDB } from "./utils/database";
 
 const app: Application = express();
 
-app.use(bodyParser.json());
+app.use(cors());
+app.use(json());
 
 app.use("/api/user", userRoutes);
 app.use("/api/csv", csvRoutes);
 
-sequelize.sync().then(() => {
-  console.log("Database connected");
-});
+connectDB();
 
 export default app;
