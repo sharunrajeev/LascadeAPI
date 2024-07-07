@@ -1,9 +1,8 @@
 import csv from "csv-parser";
 import fs from "fs";
 import mongoose from "mongoose";
-export const processCSV = async (
-  file: { path: string; name: string }
-) => {
+
+export const processCSV = async (file: { path: string; name: string }) => {
   const results: any[] = [];
   let headers: string[] = [];
   const filePath = file.path;
@@ -28,7 +27,7 @@ export const processCSV = async (
             const dynamicSchema = new mongoose.Schema(schemaDefinition, {
               timestamps: true,
             });
-            
+
             const DynamicModel = mongoose.model(fileName, dynamicSchema);
             // await DynamicModel.insertMany(results);
             const session = await mongoose.startSession();
@@ -39,7 +38,7 @@ export const processCSV = async (
 
             await session.commitTransaction();
             session.endSession();
-            console.log('DB Transaction completed');
+            console.log("DB Transaction completed");
             resolve(true);
           } catch (error) {
             reject(error);
@@ -55,6 +54,6 @@ export const processCSV = async (
         });
     });
   } catch (error: any) {
-    console.error('Failed to process CSV data.', error);
+    console.error("Failed to process CSV data.", error);
   }
 };
