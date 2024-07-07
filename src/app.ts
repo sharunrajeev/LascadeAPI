@@ -1,19 +1,31 @@
 require("dotenv").config();
-import express, { Application } from "express";
-import bodyParser from "body-parser";
-import userRoutes from "./routes/user";
-import csvRoutes from "./routes/csv";
-import { sequelize } from "./models";
+const { createBullBoard } = require("@bull-board/api");
+const { BullAdapter } = require("@bull-board/api/bullAdapter");
+const { ExpressAdapter } = require("@bull-board/express");
+import express, { Application, json } from "express";
+import cors from "cors";
+import userRoutes from "./routes/userRoutes";
+import csvRoutes from "./routes/csvRoutes";
+import { connectDB } from "./utils/database";
+import csvQueue from "./utils/queue";
 
 const app: Application = express();
 
-app.use(bodyParser.json());
+const serverAdapter = new ExpressAdapter();
+const csvQueueBullAdapter = new BullAdapter(csvQueue);
+serverAdapter.setBasePath("/api/queue");
+createBullBoard({
+  queues: [csvQueueBullAdapter],
+  serverAdapter: serverAdapter,
+});
+
+app.use(cors());
+app.use(json());
 
 app.use("/api/user", userRoutes);
 app.use("/api/csv", csvRoutes);
+app.use("/api/queue", serverAdapter.getRouter());
 
-sequelize.sync().then(() => {
-  console.log("Database connected");
-});
+connectDB();
 
 export default app;

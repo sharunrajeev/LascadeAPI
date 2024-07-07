@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
-import multer from "multer";
-import path from "path";
 import fs from "fs";
-import csvProcessor from "../workers/csvProcessor"; // Assuming csvProcessor is your module to process CSV files
+import multer from "multer";
+import { csvQueue } from "../utils/queue";
 
-// Set up Multer storage configuration
+// Multer storage configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = "uploads/";
@@ -14,11 +13,8 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(
-      null,
-      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
-    );
+    const uniqueSuffix = Date.now();
+    cb(null, uniqueSuffix + "-" + file.originalname);
   },
 });
 
@@ -35,12 +31,10 @@ const fileFilter = (
   cb(null, true);
 };
 
-// Initialize Multer with the storage and file filter
 const upload = multer({ storage, fileFilter });
 
-// CSV upload handler
-export const uploadCSV = (req: Request, res: Response) => {
-  upload.single("file")(req, res, (err) => {
+const uploadCSV = (req: Request, res: Response) => {
+  upload.single("file")(req, res, async (err) => {
     if (err) {
       return res.status(400).json({ message: err.message });
     }
@@ -48,23 +42,21 @@ export const uploadCSV = (req: Request, res: Response) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    console.log("File uploaded successfully:", req.file);
-    // Process the CSV file
-    req.file.path
-      ? csvProcessor(req.file.path)
-          .then(() => {
-            res
-              .status(200)
-              .json({ message: "CSV file processed successfully" });
-          })
-          .catch((processError) => {
-            res
-              .status(500)
-              .json({
-                message: "Error processing CSV file",
-                error: processError.message,
-              });
-          })
-      : res.status(400).json({ message: "Unable to fetch file path" });
+    try {
+      const csvJob = await csvQueue.add({
+        file: { path: req.file.path, name: req.file.filename },
+        userId: req.user,
+      });
+
+      res.status(202).json({
+        message: `File received and processing started with jobID: ${csvJob.id}`,
+      });
+    } catch (err) {
+      res.status(500).json({
+        message: `Internal server failed. Unable to create queue`,
+      });
+    }
   });
 };
+
+export default uploadCSV;
