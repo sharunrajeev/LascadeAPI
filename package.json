@@ -1,6 +1,6 @@
 {
   "name": "lascade-api",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "API created as part of the coding challenge of Lascade Techologies test",
   "main": "index.ts",
   "scripts": {
