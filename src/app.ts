@@ -1,22 +1,31 @@
 require("dotenv").config();
+const { createBullBoard } = require("@bull-board/api");
+const { BullAdapter } = require("@bull-board/api/bullAdapter");
+const { ExpressAdapter } = require("@bull-board/express");
 import express, { Application, json } from "express";
 import cors from "cors";
 import userRoutes from "./routes/userRoutes";
 import csvRoutes from "./routes/csvRoutes";
-import fileRoutes from "./routes/fileRoutes";
 import { connectDB } from "./utils/database";
-import { initializeQueue } from "./utils/queue";
+import csvQueue from "./utils/queue";
 
 const app: Application = express();
+
+const serverAdapter = new ExpressAdapter();
+const csvQueueBullAdapter = new BullAdapter(csvQueue);
+serverAdapter.setBasePath("/api/queue");
+createBullBoard({
+  queues: [csvQueueBullAdapter],
+  serverAdapter: serverAdapter,
+});
 
 app.use(cors());
 app.use(json());
 
 app.use("/api/user", userRoutes);
 app.use("/api/csv", csvRoutes);
-app.use("/api/file", fileRoutes)
+app.use("/api/queue", serverAdapter.getRouter());
 
 connectDB();
-initializeQueue();
 
 export default app;

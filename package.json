@@ -21,15 +21,19 @@
   },
   "homepage": "https://github.com/sharunrajeev/LascadeAPI#readme",
   "dependencies": {
+    "@bull-board/api": "^5.20.5",
+    "@bull-board/express": "^5.20.5",
     "bcrypt": "^5.1.1",
     "bull": "^4.15.1",
     "cors": "^2.8.5",
     "csv-parser": "^3.0.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "fs": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.5",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "path": "^0.12.7"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

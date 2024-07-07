@@ -8,21 +8,21 @@ export const csvQueue = new Queue("csvQueue", {
   },
 });
 
-export const initializeQueue = () => {
-  csvQueue.process(async (job) => {
-    try {
-      await processCSV(job.data.file, job.data.userId);
-      job.moveToCompleted("done", true);
-    } catch (error) {
-      if (job.attemptsMade >= 5) {
-        job.moveToFailed({ message: "Job failed after 5 attempts" });
-      } else {
-        job.retry();
-      }
-    }
-  });
+// Define queue processing
+csvQueue.process(async (job) => {
+  const { file } = job.data;
+  try {
+    await processCSV(file); // Process the CSV using your existing function
+    return true; // Job succeeded
+  } catch (error) {
+    console.error(`CSV processing failed for file ${file.name}:`, error);
+    throw new Error(`CSV processing failed for file ${file.name}`);
+  }
+});
 
-  csvQueue.on("failed", (job, err) => {
-    console.error(`Job failed with error ${err.message}`);
-  });
-};
+// Error handling
+csvQueue.on("error", (error) => {
+  console.error("Queue error:", error);
+});
+
+export default csvQueue;

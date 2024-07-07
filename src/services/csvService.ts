@@ -1,31 +1,16 @@
 import csv from "csv-parser";
 import fs from "fs";
 import mongoose from "mongoose";
-import FileStatus from "../models/FileStatus";
-
 export const processCSV = async (
-  file: { path: string; name: string },
-  userId: string
+  file: { path: string; name: string }
 ) => {
   const results: any[] = [];
   let headers: string[] = [];
   const filePath = file.path;
   const fileName = file.name;
 
-  // Create a new file status entry
-  const fileStatus = new FileStatus({
-    filename: fileName,
-    filepath: filePath,
-    status: "processing",
-    userId: userId,
-  });
-
-  console.log('ProcessCSV called');
-
   try {
-    await fileStatus.save(); // Save the initial status
-
-    await new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       fs.createReadStream(filePath)
         .pipe(csv())
         .on("headers", (headerList) => {
@@ -43,8 +28,9 @@ export const processCSV = async (
             const dynamicSchema = new mongoose.Schema(schemaDefinition, {
               timestamps: true,
             });
-            const DynamicModel = mongoose.model("CSVData", dynamicSchema);
-
+            
+            const DynamicModel = mongoose.model(fileName, dynamicSchema);
+            // await DynamicModel.insertMany(results);
             const session = await mongoose.startSession();
             session.startTransaction();
 
@@ -53,11 +39,7 @@ export const processCSV = async (
 
             await session.commitTransaction();
             session.endSession();
-
-            // Update file status upon successful processing
-            fileStatus.status = "completed";
-            await fileStatus.save();
-
+            console.log('DB Transaction completed');
             resolve(true);
           } catch (error) {
             reject(error);
@@ -73,8 +55,6 @@ export const processCSV = async (
         });
     });
   } catch (error: any) {
-    fileStatus.status = "failed";
-    fileStatus.errorMessage = error.message;
-    await fileStatus.save();
+    console.error('Failed to process CSV data.', error);
   }
 };
